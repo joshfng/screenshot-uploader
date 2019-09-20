@@ -76,7 +76,6 @@ func watchForChanges() {
 				log.Info("s3 key: " + s3Key)
 
 				file, _ := os.Open(event.Name)
-				defer file.Close()
 
 				log.Info("Uploading file to S3...")
 				result, err := s3Uploader.Upload(&s3manager.UploadInput{
@@ -96,6 +95,8 @@ func watchForChanges() {
 
 				clipboard.WriteAll(result.Location)
 				notify.Notify("Screenshot Uploader", "", "Linked copied to clipboard", "")
+
+				file.Close()
 			}
 
 			// watch for errors
