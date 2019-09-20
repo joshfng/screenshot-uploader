@@ -13,7 +13,10 @@ AWS_REGION=us-east-1
 AWS_CONFIG_FILE=/full/path/to/.aws/config
 S3_BUCKET=i.joshfrye.com
 
-# and new .png added here will be uploaded
+# leave blank to use default s3 url, only set if you have a cname record
+S3_HOST=http://joshfrye.com
+
+# any new .png added here will be uploaded
 SCREENSHOT_LOCATION=/Users/josh/Desktop
 ```
 

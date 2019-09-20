@@ -20,6 +20,7 @@ import (
 
 var (
 	s3Bucket       = ""
+	s3Host         = ""
 	awsRegion      = ""
 	awsConfigFile  = ""
 	watchDirectory = ""
@@ -35,13 +36,17 @@ func initConfig() {
 	}
 
 	s3Bucket = os.Getenv("S3_BUCKET")
+	s3Host = os.Getenv("S3_HOST")
 	awsRegion = os.Getenv("AWS_REGION")
 	awsConfigFile = os.Getenv("AWS_CONFIG_FILE")
 	watchDirectory = os.Getenv("SCREENSHOT_LOCATION")
 
 	creds := credentials.NewSharedCredentials(awsConfigFile, "default")
 
-	conf := aws.Config{Region: aws.String(awsRegion), Credentials: creds}
+	conf := aws.Config{
+		Region:      aws.String(awsRegion),
+		Credentials: creds,
+	}
 	sess := session.New(&conf)
 	s3Uploader = s3manager.NewUploader(sess)
 }
@@ -59,7 +64,6 @@ func watchForChanges() {
 
 	for {
 		select {
-		// watch for events
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				if path.Base(event.Name)[:1] == "." {
@@ -93,13 +97,17 @@ func watchForChanges() {
 
 				log.Infof("Successfully uploaded %s to %s", event.Name, result.Location)
 
-				clipboard.WriteAll(result.Location)
+				url := result.Location
+				if s3Host != "" {
+					url = s3Host + "/" + s3Key
+				}
+
+				clipboard.WriteAll(url)
 				notify.Notify("Screenshot Uploader", "", "Linked copied to clipboard", "")
 
 				file.Close()
 			}
 
-			// watch for errors
 		case err := <-watcher.Errors:
 			log.Info("ERROR", err)
 		}
