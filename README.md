@@ -10,6 +10,7 @@ This program assumes you have an aws config file. Next create a file in your hom
 
 ```.env
 AWS_REGION=us-east-1
+AWS_PROFILE=default
 AWS_CONFIG_FILE=/full/path/to/.aws/config
 S3_BUCKET=i.joshfrye.com
 

@@ -22,6 +22,7 @@ var (
 	s3Bucket       = ""
 	s3Host         = ""
 	awsRegion      = ""
+	awsProfile     = ""
 	awsConfigFile  = ""
 	watchDirectory = ""
 	s3Uploader     = &s3manager.Uploader{}
@@ -38,10 +39,11 @@ func initConfig() {
 	s3Bucket = os.Getenv("S3_BUCKET")
 	s3Host = os.Getenv("S3_HOST")
 	awsRegion = os.Getenv("AWS_REGION")
+	awsProfile = os.Getenv("AWS_PROFILE")
 	awsConfigFile = os.Getenv("AWS_CONFIG_FILE")
 	watchDirectory = os.Getenv("SCREENSHOT_LOCATION")
 
-	creds := credentials.NewSharedCredentials(awsConfigFile, "default")
+	creds := credentials.NewSharedCredentials(awsConfigFile, awsProfile)
 
 	conf := aws.Config{
 		Region:      aws.String(awsRegion),
