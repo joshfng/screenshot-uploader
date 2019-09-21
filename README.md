@@ -12,10 +12,10 @@ This program assumes you have an aws config file. Next create a file in your hom
 AWS_REGION=us-east-1
 AWS_PROFILE=default
 AWS_CONFIG_FILE=/full/path/to/.aws/config
-S3_BUCKET=i.joshfrye.com
+S3_BUCKET=i.mydomain.com
 
 # leave blank to use default s3 url, only set if you have a cname record
-S3_HOST=http://joshfrye.com
+S3_HOST=http://i.mydomain.com
 
 # any new .png or .mov added here will be uploaded
 SCREENSHOT_LOCATION=/Users/josh/Desktop
@@ -27,4 +27,4 @@ If you want the program to always run, download `com.screenshot.uploader.plist`,
 
 ## TODO
 
-- Menu bar item
+- Menu bar item?
