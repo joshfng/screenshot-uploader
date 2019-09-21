@@ -52,11 +52,26 @@ func initConfig() {
 	s3Uploader = s3manager.NewUploader(sess)
 }
 
-func uploadScreenshot(filepath string) {
-	s3Key := RandomString(5) + ".png"
+func uploadScreenshot(filePath string) {
+	ext := filepath.Ext(filePath)
+
+	if ext != ".png" && ext != ".mov" {
+		return
+	}
+
+	mimeType := ""
+	if ext == ".png" {
+		mimeType = "image/png"
+	}
+
+	if ext == ".mov" {
+		mimeType = "video/quicktime"
+	}
+
+	s3Key := RandomString(5) + ext
 	fmt.Println("s3 key: " + s3Key)
 
-	file, _ := os.Open(filepath)
+	file, _ := os.Open(filePath)
 
 	fmt.Println("Uploading file to S3...")
 	result, err := s3Uploader.Upload(&s3manager.UploadInput{
@@ -64,7 +79,7 @@ func uploadScreenshot(filepath string) {
 		Key:         aws.String(s3Key),
 		Body:        file,
 		ACL:         aws.String("public-read"),
-		ContentType: aws.String("image/png"),
+		ContentType: aws.String(mimeType),
 	})
 
 	if err != nil {
@@ -72,7 +87,7 @@ func uploadScreenshot(filepath string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Successfully uploaded %s to %s\n", filepath, result.Location)
+	fmt.Printf("Successfully uploaded %s to %s\n", filePath, result.Location)
 
 	url := result.Location
 	if s3Host != "" {
@@ -91,12 +106,12 @@ func sendNotification(url string) {
 func watchForChanges() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		fmt.Println("ERROR", err)
+		panic(err)
 	}
 	defer watcher.Close()
 
 	if err := watcher.Add(watchDirectory); err != nil {
-		fmt.Println("ERROR", err)
+		panic(err)
 	}
 
 	for {
@@ -107,17 +122,11 @@ func watchForChanges() {
 					continue
 				}
 
-				if filepath.Ext(event.Name) != ".png" {
-					continue
-				}
-
-				fmt.Println("created file:", event.Name)
-
 				uploadScreenshot(event.Name)
 			}
 
 		case err := <-watcher.Errors:
-			fmt.Println("ERROR", err)
+			panic(err)
 		}
 	}
 }
