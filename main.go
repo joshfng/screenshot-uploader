@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/fsnotify/fsnotify"
 	"github.com/joho/godotenv"
-	"github.com/labstack/gommon/log"
 	"github.com/martinlindhe/notify"
 )
 
@@ -33,7 +32,7 @@ func initConfig() {
 	dir := usr.HomeDir
 	err := godotenv.Load(dir + "/.screenshot-uploader")
 	if err != nil {
-		log.Fatal("Error loading ~/.screenshot-uploader file")
+		panic("Error loading ~/.screenshot-uploader file")
 	}
 
 	s3Bucket = os.Getenv("S3_BUCKET")
@@ -53,6 +52,42 @@ func initConfig() {
 	s3Uploader = s3manager.NewUploader(sess)
 }
 
+func uploadScreenshot(filepath string) {
+	s3Key := RandomString(5) + ".png"
+	fmt.Println("s3 key: " + s3Key)
+
+	file, _ := os.Open(filepath)
+
+	fmt.Println("Uploading file to S3...")
+	result, err := s3Uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(s3Bucket),
+		Key:         aws.String(s3Key),
+		Body:        file,
+		ACL:         aws.String("public-read"),
+		ContentType: aws.String("image/png"),
+	})
+
+	if err != nil {
+		fmt.Println("s3 upload error", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Successfully uploaded %s to %s\n", filepath, result.Location)
+
+	url := result.Location
+	if s3Host != "" {
+		url = s3Host + "/" + s3Key
+	}
+
+	file.Close()
+	sendNotification(url)
+}
+
+func sendNotification(url string) {
+	clipboard.WriteAll(url)
+	notify.Notify("Screenshot Uploader", "", "Linked copied to clipboard", "")
+}
+
 func watchForChanges() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -61,7 +96,7 @@ func watchForChanges() {
 	defer watcher.Close()
 
 	if err := watcher.Add(watchDirectory); err != nil {
-		log.Info("ERROR", err)
+		fmt.Println("ERROR", err)
 	}
 
 	for {
@@ -76,42 +111,13 @@ func watchForChanges() {
 					continue
 				}
 
-				log.Info("created file:", event.Name)
+				fmt.Println("created file:", event.Name)
 
-				s3Key := RandomString(5) + ".png"
-				log.Info("s3 key: " + s3Key)
-
-				file, _ := os.Open(event.Name)
-
-				log.Info("Uploading file to S3...")
-				result, err := s3Uploader.Upload(&s3manager.UploadInput{
-					Bucket:      aws.String(s3Bucket),
-					Key:         aws.String(s3Key),
-					Body:        file,
-					ACL:         aws.String("public-read"),
-					ContentType: aws.String("image/png"),
-				})
-
-				if err != nil {
-					log.Info("s3 upload error", err)
-					os.Exit(1)
-				}
-
-				log.Infof("Successfully uploaded %s to %s", event.Name, result.Location)
-
-				url := result.Location
-				if s3Host != "" {
-					url = s3Host + "/" + s3Key
-				}
-
-				clipboard.WriteAll(url)
-				notify.Notify("Screenshot Uploader", "", "Linked copied to clipboard", "")
-
-				file.Close()
+				uploadScreenshot(event.Name)
 			}
 
 		case err := <-watcher.Errors:
-			log.Info("ERROR", err)
+			fmt.Println("ERROR", err)
 		}
 	}
 }
