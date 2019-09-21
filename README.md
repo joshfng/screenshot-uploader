@@ -23,7 +23,8 @@ SCREENSHOT_LOCATION=/Users/josh/Desktop
 
 Download a release and place it somewhere in your path, then run `screenshot-uploader`. Any new pngs or movs created in your watch directory will be uploaded.
 
+If you want the program to always run, download `com.screenshoot.uploader.plist`, edit the path to the binary, and run `launchctl load com.screenshot.uploader.plist`.
+
 ## TODO
 
 - Menu bar item
-- Launch agent/plist?
