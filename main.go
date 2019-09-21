@@ -82,6 +82,8 @@ func uploadScreenshot(filePath string) {
 		ContentType: aws.String(mimeType),
 	})
 
+	file.Close()
+
 	if err != nil {
 		fmt.Println("s3 upload error", err)
 		os.Exit(1)
@@ -94,7 +96,6 @@ func uploadScreenshot(filePath string) {
 		url = s3Host + "/" + s3Key
 	}
 
-	file.Close()
 	sendNotification(url)
 }
 
