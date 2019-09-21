@@ -100,7 +100,7 @@ func uploadScreenshot(filePath string) {
 
 func sendNotification(url string) {
 	clipboard.WriteAll(url)
-	notify.Notify("Screenshot Uploader", "", "Linked copied to clipboard", "")
+	notify.Notify("Screenshot Uploaded!", "", "Linked copied to clipboard", "")
 }
 
 func watchForChanges() {
