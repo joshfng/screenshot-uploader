@@ -17,13 +17,13 @@ S3_BUCKET=i.joshfrye.com
 # leave blank to use default s3 url, only set if you have a cname record
 S3_HOST=http://joshfrye.com
 
-# any new .png added here will be uploaded
+# any new .png or .mov added here will be uploaded
 SCREENSHOT_LOCATION=/Users/josh/Desktop
 ```
 
 Download a release and place it somewhere in your path, then run `screenshot-uploader`. Any new pngs or movs created in your watch directory will be uploaded.
 
-If you want the program to always run, download `com.screenshoot.uploader.plist`, edit the path to the binary, and run `launchctl load com.screenshot.uploader.plist`.
+If you want the program to always run, download `com.screenshot.uploader.plist`, edit the path to the binary, and run `launchctl load com.screenshot.uploader.plist`.
 
 ## TODO
 
