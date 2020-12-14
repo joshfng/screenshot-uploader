@@ -28,11 +28,11 @@ var (
 )
 
 func initConfig() {
-	usr, _ := user.Current()
-	dir := usr.HomeDir
-	err := godotenv.Load(dir + "/.screenshot-uploader")
+	user, _ := user.Current()
+	directory := user.HomeDir
+	err := godotenv.Load(directory + "/.config/screenshot-uploader")
 	if err != nil {
-		panic("Error loading ~/.screenshot-uploader file")
+		panic("Error loading ~/.config/screenshot-uploader file")
 	}
 
 	s3Bucket = os.Getenv("S3_BUCKET")
@@ -42,29 +42,33 @@ func initConfig() {
 	awsConfigFile = os.Getenv("AWS_CONFIG_FILE")
 	watchDirectory = os.Getenv("SCREENSHOT_LOCATION")
 
+	fmt.Printf("Watching for changes in %s\n", watchDirectory)
+
 	creds := credentials.NewSharedCredentials(awsConfigFile, awsProfile)
 
-	conf := aws.Config{
+	config := aws.Config{
 		Region:      aws.String(awsRegion),
 		Credentials: creds,
 	}
-	sess := session.New(&conf)
-	s3Uploader = s3manager.NewUploader(sess)
+	session := session.New(&config)
+	s3Uploader = s3manager.NewUploader(session)
 }
 
 func uploadScreenshot(filePath string) {
 	ext := filepath.Ext(filePath)
 
-	if ext != ".png" && ext != ".mov" {
+	if ext != ".png" && ext != ".jpg" && ext != ".mov" {
 		return
 	}
 
 	mimeType := ""
-	if ext == ".png" {
-		mimeType = "image/png"
-	}
 
-	if ext == ".mov" {
+	switch ext {
+	case ".png":
+		mimeType = "image/png"
+	case ".jpg":
+		mimeType = "image/jpeg"
+	case ".mov":
 		mimeType = "video/quicktime"
 	}
 
@@ -86,7 +90,7 @@ func uploadScreenshot(filePath string) {
 
 	if err != nil {
 		fmt.Println("s3 upload error", err)
-		os.Exit(1)
+		return
 	}
 
 	fmt.Printf("Successfully uploaded %s to %s\n", filePath, result.Location)
@@ -107,19 +111,27 @@ func sendNotification(url string) {
 func watchForChanges() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer watcher.Close()
 
 	if err := watcher.Add(watchDirectory); err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	for {
 		select {
 		case event := <-watcher.Events:
-			if event.Op&fsnotify.Create == fsnotify.Create {
+			// fmt.Printf("event: %v\n", event)
+			switch event.Op {
+			case fsnotify.Write, fsnotify.Create:
 				if path.Base(event.Name)[:1] == "." {
+					continue
+				}
+
+				if path.Base(event.Name)[:1] == ".." {
 					continue
 				}
 
@@ -127,6 +139,10 @@ func watchForChanges() {
 			}
 
 		case err := <-watcher.Errors:
+			// if err == nil {
+			//     panic("unexpected nil err")
+			// }
+			// return
 			panic(err)
 		}
 	}
