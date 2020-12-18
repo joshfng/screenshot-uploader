@@ -1,5 +1,5 @@
 BINARY := "screenshot-uploader"
-VERSION=1.0.5
+VERSION=1.0.6
 BUILD=`git rev-parse HEAD`
 PLATFORMS=darwin
 ARCHITECTURES=amd64

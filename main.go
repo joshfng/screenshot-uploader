@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/user"
@@ -16,6 +17,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/martinlindhe/notify"
 )
+
+const AppVersion = "1.0.6"
 
 var (
 	s3Bucket       = ""
@@ -149,6 +152,14 @@ func watchForChanges() {
 }
 
 func main() {
+	version := flag.Bool("v", false, "prints current version")
+	flag.Parse()
+
+	if *version {
+		fmt.Println(AppVersion)
+		os.Exit(0)
+	}
+
 	initConfig()
 	watchForChanges()
 }
