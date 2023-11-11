@@ -18,7 +18,7 @@ S3_BUCKET=i.mydomain.com
 S3_HOST=http://i.mydomain.com
 
 # any new .png or .mov added here will be uploaded
-SCREENSHOT_LOCATION=/Users/josh/Desktop
+SCREENSHOT_LOCATION=/Users/j/Desktop
 ```
 
 Download a release and place it somewhere in your path, then run `screenshot-uploader`. Any new pngs or movs created in your watch directory will be uploaded.

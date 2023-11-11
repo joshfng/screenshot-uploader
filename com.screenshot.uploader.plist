@@ -5,9 +5,9 @@
     <key>Label</key>
     <string>com.screenshot.uploader</string>
     <key>Program</key>
-    <string>/Users/Josh/bin/screenshot-uploader</string>
-    <key>StandardOutPath</key><string>/Users/Josh/Library/Logs/screenshot-uploader.out.log</string>
-    <key>StandardErrorPath</key><string>/Users/Josh/Library/Logs/screenshot-uploader.err.log</string>
+    <string>/Users/j/bin/screenshot-uploader</string>
+    <key>StandardOutPath</key><string>/Users/j/Library/Logs/screenshot-uploader.out.log</string>
+    <key>StandardErrorPath</key><string>/Users/j/Library/Logs/screenshot-uploader.err.log</string>
     <key>KeepAlive</key><true/>
     <key>RunAtLoad</key><true/>
   </dict>
